@@ -1,0 +1,49 @@
+[package]
+name = "tasktree"
+version = "0.1.0"
+description = "Distributed task-tree values: W3C trace-compatible task identities under an application-supplied URN scheme, validated lifecycle transitions, lineage, and progress"
+authors = ["Jacobus Geluk <jacobus.geluk@dataroad.com>"]
+edition = "2024"
+rust-version = "1.89"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/legra-ai/tasktree"
+documentation = "https://docs.rs/tasktree"
+readme = "README.md"
+build = "build.rs"
+keywords = ["task", "tracing", "traceparent", "lifecycle", "distributed"]
+categories = ["asynchronous", "data-structures"]
+include = [
+    "Cargo.toml",
+    "README.md",
+    "LICENSE-APACHE",
+    "LICENSE-MIT",
+    "build.rs",
+    "src/**/*.rs",
+]
+
+[dependencies]
+rand = "0.9"
+serde = { version = "1", features = ["derive"] }
+thiserror = "2"
+
+[dev-dependencies]
+serde_json = "1"
+
+[build-dependencies]
+rhusky = "0.0.6"
+
+[lints.rust]
+missing_docs = "deny"
+unreachable_pub = "deny"
+
+[lints.rustdoc]
+missing_crate_level_docs = "deny"
+broken_intra_doc_links = "deny"
+
+[lints.clippy]
+all = { level = "deny", priority = -1 }
+pedantic = { level = "deny", priority = -1 }
+# Typed domain error enums (TaskLineageError carries both task ids) are
+# intentionally returned by value on cold validation paths; boxing them
+# obscures the types for no benefit.
+result_large_err = "allow"
