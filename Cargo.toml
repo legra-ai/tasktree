@@ -1,6 +1,6 @@
 [package]
 name = "tasktree"
-version = "0.1.1"
+version = "0.1.2"
 description = "Distributed task-tree values: W3C trace-compatible task identities under an application-supplied URN scheme, validated lifecycle transitions, lineage, and progress"
 authors = ["Jacobus Geluk <jacobus.geluk@dataroad.com>"]
 edition = "2024"
