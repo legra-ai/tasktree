@@ -8,6 +8,7 @@ mod progress;
 mod progress_unit;
 mod progress_update;
 mod scheme;
+mod terminal_cause;
 mod timestamps;
 
 #[cfg(test)]
@@ -33,4 +34,11 @@ pub use progress::TaskProgress;
 pub use progress_unit::ProgressUnit;
 pub use progress_update::TaskProgressUpdate;
 pub use scheme::UrnScheme;
+pub use terminal_cause::{
+    BudgetResource,
+    DeadlineAuthority,
+    FaultSide,
+    OriginatingCause,
+    TerminalCause,
+};
 pub use timestamps::TaskTimestamps;
