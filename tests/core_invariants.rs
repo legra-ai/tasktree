@@ -4,6 +4,7 @@ mod support;
 
 use support::ExampleUrn;
 use tasktree::{
+    OriginatingCause,
     TaskId as GenericTaskId,
     TaskLineage as GenericTaskLineage,
     TaskLineageError,
@@ -11,6 +12,7 @@ use tasktree::{
     TaskStatus,
     TaskTransition,
     TaskTreeId as GenericTaskTreeId,
+    TerminalCause,
 };
 
 type TaskId = GenericTaskId<ExampleUrn>;
@@ -114,10 +116,27 @@ fn every_status_label_round_trips() {
     }
 }
 
+/// A cause that ends in `to`, so an edge test can exercise the edge
+/// alone.
+fn cause_ending_in(to: TaskStatus) -> Option<TerminalCause> {
+    match to {
+        TaskStatus::Failed => Some(OriginatingCause::HostRestarted.direct()),
+        TaskStatus::Cancelled => Some(OriginatingCause::CallerCancelled.direct()),
+        _ => None,
+    }
+}
+
 #[test]
 fn lifecycle_rejects_terminal_reversal_at_construction_and_deserialization() {
-    assert!(TaskTransition::try_new(TaskStatus::Done, TaskStatus::Running).is_err());
-    assert!(TaskTransition::try_new(TaskStatus::Cancelled, TaskStatus::Failed).is_err());
+    assert!(TaskTransition::try_new(TaskStatus::Done, TaskStatus::Running, None).is_err());
+    assert!(
+        TaskTransition::try_new(
+            TaskStatus::Cancelled,
+            TaskStatus::Failed,
+            cause_ending_in(TaskStatus::Failed)
+        )
+        .is_err()
+    );
     assert!(serde_json::from_str::<TaskTransition>(r#"{"from":"done","to":"running"}"#).is_err());
 }
 
@@ -126,8 +145,10 @@ fn lifecycle_accepts_the_complete_legal_transition_set() {
     let legal = [
         (TaskStatus::Admitted, TaskStatus::Queued),
         (TaskStatus::Admitted, TaskStatus::Running),
+        (TaskStatus::Admitted, TaskStatus::Failed),
         (TaskStatus::Admitted, TaskStatus::Cancelled),
         (TaskStatus::Queued, TaskStatus::Running),
+        (TaskStatus::Queued, TaskStatus::Failed),
         (TaskStatus::Queued, TaskStatus::Cancelled),
         (TaskStatus::Running, TaskStatus::Sealing),
         (TaskStatus::Running, TaskStatus::Done),
@@ -141,7 +162,12 @@ fn lifecycle_accepts_the_complete_legal_transition_set() {
         for to in TaskStatus::ALL {
             let expected = legal.contains(&(from, to));
             assert_eq!(
-                TaskTransition::try_new(from, to).is_ok(),
+                from.validate_transition(to).is_ok(),
+                expected,
+                "unexpected lifecycle edge result for {from:?} -> {to:?}"
+            );
+            assert_eq!(
+                TaskTransition::try_new(from, to, cause_ending_in(to)).is_ok(),
                 expected,
                 "unexpected lifecycle result for {from:?} -> {to:?}"
             );

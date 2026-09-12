@@ -29,6 +29,14 @@ the engine (registries, admission, execution, event streams) is yours.
   terminal states admit no exits, and the irreversible sealing region
   refuses cancellation. Illegal edges are unrepresentable as
   `TaskTransition` values.
+- **Terminal cause** — every move into `failed` or `cancelled` carries a
+  `TerminalCause`: the originating event (caller cancel, session close,
+  deadline, exhausted budget, executor failure, stall, lost node, host
+  eviction, host restart), whether this task was its subject or collateral of the
+  cascade, the terminal status that event ends in, and the party
+  (`FaultSide`) it is attributed to. A cause-less terminal edge, a cause
+  on a non-terminal edge, or a cause that ends in the other terminal
+  status is refused at construction and at deserialization.
 - **Lineage** — `TaskLineage` proves a parent-child edge is within one
   tree and never self-referential, enforced again on deserialization.
 - **Progress** — typed units, bounded aggregation, display fractions,
