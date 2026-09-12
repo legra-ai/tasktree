@@ -32,7 +32,7 @@ the engine (registries, admission, execution, event streams) is yours.
 - **Terminal cause** — every move into `failed` or `cancelled` carries a
   `TerminalCause`: the originating event (caller cancel, session close,
   deadline, exhausted budget, executor failure, stall, lost node, host
-  restart), whether this task was its subject or collateral of the
+  eviction, host restart), whether this task was its subject or collateral of the
   cascade, the terminal status that event ends in, and the party
   (`FaultSide`) it is attributed to. A cause-less terminal edge, a cause
   on a non-terminal edge, or a cause that ends in the other terminal

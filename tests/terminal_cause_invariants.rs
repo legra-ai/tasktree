@@ -79,6 +79,11 @@ fn every_originating_cause_binds_one_terminal_status_and_one_fault_side() {
             FaultSide::Provider,
         ),
         (
+            OriginatingCause::HostEvicted,
+            TaskStatus::Cancelled,
+            FaultSide::Provider,
+        ),
+        (
             OriginatingCause::HostRestarted,
             TaskStatus::Failed,
             FaultSide::Provider,
@@ -207,7 +212,7 @@ fn cause_labels_are_distinct_and_stable() {
     let mut labels: Vec<&str> = OriginatingCause::ALL.iter().map(|c| c.as_str()).collect();
     labels.sort_unstable();
     labels.dedup();
-    assert_eq!(labels.len(), 8, "one label per cause kind");
+    assert_eq!(labels.len(), 9, "one label per cause kind");
     assert_eq!(FaultSide::Caller.as_str(), "caller");
     assert_eq!(FaultSide::Provider.as_str(), "provider");
 }

@@ -85,13 +85,17 @@ pub enum OriginatingCause {
     ProgressStalled,
     /// The node executing the task became unreachable.
     NodeLost,
+    /// The host withdrew the resource the task was running on — it
+    /// unloaded the workspace, moved the shard, or shut the executor
+    /// down — while the task was still live.
+    HostEvicted,
     /// The host restarted before the task completed.
     HostRestarted,
 }
 
 impl OriginatingCause {
     /// Every originating cause, for exhaustive tests.
-    pub const ALL: [Self; 11] = [
+    pub const ALL: [Self; 12] = [
         Self::CallerCancelled,
         Self::SessionClosed,
         Self::Deadline {
@@ -114,6 +118,7 @@ impl OriginatingCause {
         },
         Self::ProgressStalled,
         Self::NodeLost,
+        Self::HostEvicted,
         Self::HostRestarted,
     ];
 
@@ -122,8 +127,8 @@ impl OriginatingCause {
     /// Hard limits — a deadline, an exhausted budget, an executor
     /// failure, a lost host — end in `Failed`: the work did not
     /// complete and nothing chose to stop it. An explicit stop, a
-    /// closed session, a stalled watchdog, or a lost node end in
-    /// `Cancelled`.
+    /// closed session, a stalled watchdog, a lost node, or a host
+    /// withdrawing the task's resource end in `Cancelled`.
     #[must_use]
     pub const fn terminal_status(self) -> TaskStatus {
         match self {
@@ -134,7 +139,8 @@ impl OriginatingCause {
             Self::CallerCancelled
             | Self::SessionClosed
             | Self::ProgressStalled
-            | Self::NodeLost => TaskStatus::Cancelled,
+            | Self::NodeLost
+            | Self::HostEvicted => TaskStatus::Cancelled,
         }
     }
 
@@ -153,7 +159,9 @@ impl OriginatingCause {
                 DeadlineAuthority::Provider => FaultSide::Provider,
             },
             Self::ExecutorFailed { fault } => fault,
-            Self::ProgressStalled | Self::NodeLost | Self::HostRestarted => FaultSide::Provider,
+            Self::ProgressStalled | Self::NodeLost | Self::HostEvicted | Self::HostRestarted => {
+                FaultSide::Provider
+            }
         }
     }
 
@@ -168,6 +176,7 @@ impl OriginatingCause {
             Self::ExecutorFailed { .. } => "executor_failed",
             Self::ProgressStalled => "progress_stalled",
             Self::NodeLost => "node_lost",
+            Self::HostEvicted => "host_evicted",
             Self::HostRestarted => "host_restarted",
         }
     }
