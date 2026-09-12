@@ -216,3 +216,17 @@ fn cause_labels_are_distinct_and_stable() {
     assert_eq!(FaultSide::Caller.as_str(), "caller");
     assert_eq!(FaultSide::Provider.as_str(), "provider");
 }
+
+#[test]
+fn causes_display_their_label_and_cascade() {
+    assert_eq!(FaultSide::Provider.to_string(), "provider");
+    assert_eq!(OriginatingCause::NodeLost.to_string(), "node_lost");
+    assert_eq!(
+        OriginatingCause::CallerCancelled.direct().to_string(),
+        "caller_cancelled"
+    );
+    assert_eq!(
+        OriginatingCause::CallerCancelled.cascaded().to_string(),
+        "cascaded from caller_cancelled"
+    );
+}

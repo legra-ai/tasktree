@@ -6,6 +6,8 @@
 //! for the work consumed, so the cause is a fact of the transition, not
 //! a second status.
 
+use std::fmt;
+
 use serde::{
     Deserialize,
     Serialize,
@@ -250,5 +252,29 @@ impl TerminalCause {
     #[must_use]
     pub const fn fault_side(self) -> FaultSide {
         self.origin.fault_side()
+    }
+}
+
+impl fmt::Display for FaultSide {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(self.as_str())
+    }
+}
+
+impl fmt::Display for OriginatingCause {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(self.as_str())
+    }
+}
+
+impl fmt::Display for TerminalCause {
+    /// The origin label, prefixed with `cascaded from` when this task
+    /// was collateral of the cascade.
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        if self.cascaded {
+            write!(f, "cascaded from {}", self.origin)
+        } else {
+            fmt::Display::fmt(&self.origin, f)
+        }
     }
 }
