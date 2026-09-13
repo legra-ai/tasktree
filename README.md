@@ -41,6 +41,15 @@ the engine (registries, admission, execution, event streams) is yours.
   tree and never self-referential, enforced again on deserialization.
 - **Progress** — typed units, bounded aggregation, display fractions,
   and lifecycle timestamps.
+- **Resource envelopes** — an abstract `Tokens` unit with checked
+  arithmetic; a `TokenBudget` that attenuates to children running in the
+  same process and reserves shares for delegated ones (siblings split the
+  pool, nothing is handed out twice); `ResourceBudget`,
+  `ResourceReservation`, and `ResourceActual` that compose bottom-up per
+  resource (sequential children sum wall time, parallel children take the
+  maximum; tokens and wall work always sum); and a typed `BudgetRefusal`.
+  No prices, factors, or ledgers: what a token buys is the application's
+  business.
 
 ```rust
 use tasktree::{TaskId, TaskLineage, TaskStatus, UrnScheme};
