@@ -127,3 +127,36 @@ fn lifecycle_terminal_states_admit_no_exits() {
             .is_err()
     );
 }
+
+#[test]
+fn tokens_use_checked_arithmetic_and_round_trip_as_text() {
+    use crate::Tokens;
+
+    assert_eq!(
+        Tokens::new(2).checked_add(Tokens::new(3)),
+        Some(Tokens::new(5))
+    );
+    assert_eq!(Tokens::new(u64::MAX).checked_add(Tokens::new(1)), None);
+    assert_eq!(
+        Tokens::new(3).checked_sub(Tokens::new(3)),
+        Some(Tokens::ZERO)
+    );
+    assert_eq!(Tokens::new(2).checked_sub(Tokens::new(3)), None);
+    assert_eq!(
+        Tokens::checked_sum([Tokens::new(1), Tokens::new(2), Tokens::new(3)]),
+        Some(Tokens::new(6))
+    );
+    assert_eq!(
+        Tokens::checked_sum([Tokens::new(u64::MAX), Tokens::new(1)]),
+        None
+    );
+    assert_eq!(Tokens::checked_sum([]), Some(Tokens::ZERO));
+    assert!(Tokens::ZERO.is_zero());
+    assert_eq!("42".parse::<Tokens>().expect("parses"), Tokens::new(42));
+    assert!("-1".parse::<Tokens>().is_err());
+    assert_eq!(Tokens::new(7).to_string(), "7");
+    assert_eq!(
+        serde_json::to_string(&Tokens::new(7)).expect("serialize"),
+        "7"
+    );
+}

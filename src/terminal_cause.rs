@@ -56,6 +56,23 @@ pub enum BudgetResource {
     Tokens,
 }
 
+impl BudgetResource {
+    /// Stable label of the resource.
+    #[must_use]
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::WallTime => "wall_time",
+            Self::Tokens => "tokens",
+        }
+    }
+}
+
+impl fmt::Display for BudgetResource {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(self.as_str())
+    }
+}
+
 /// The event that first ended a task, before any cascade.
 ///
 /// Every variant knows the terminal status it ends in and the party it
