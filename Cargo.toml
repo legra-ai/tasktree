@@ -4,7 +4,7 @@ version = "1.1.0"
 description = "Distributed task-tree values: W3C trace-compatible task identities under an application-supplied URN scheme, validated lifecycle transitions, lineage, and progress"
 authors = ["Jacobus Geluk <jacobus.geluk@dataroad.com>"]
 edition = "2024"
-rust-version = "1.89"
+rust-version = "1.89.0"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/legra-ai/tasktree"
 documentation = "https://docs.rs/tasktree"
@@ -14,12 +14,13 @@ keywords = ["task", "tracing", "traceparent", "lifecycle", "distributed"]
 categories = ["asynchronous", "data-structures"]
 include = [
     "Cargo.toml",
+    "Cargo.lock",
     "README.md",
     "LICENSE-APACHE",
     "LICENSE-MIT",
     "build.rs",
     "src/**/*.rs",
-    "tests/**/*.rs",
+    "tests/**",
 ]
 
 [dependencies]
@@ -31,7 +32,7 @@ thiserror = "2"
 serde_json = "1"
 
 [build-dependencies]
-rhusky = "0.0.6"
+rhusky = "2.0.1"
 
 [lints.rust]
 missing_docs = "deny"
