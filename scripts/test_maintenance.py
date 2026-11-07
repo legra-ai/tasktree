@@ -73,6 +73,7 @@ class MaintenancePolicyTests(unittest.TestCase):
     def test_compiler_and_formatter_pins_match_hooks(self):
         package = tomllib.loads((ROOT / 'Cargo.toml').read_text())['package']
         compiler = tomllib.loads((ROOT / 'rust-toolchain.toml').read_text())['toolchain']['channel']
+        self.assertEqual(compiler, '1.99.1')
         self.assertEqual(compiler, package['rust-version'])
         self.assertRegex((ROOT / 'rustfmt-toolchain').read_text().strip(), r'^nightly-\d{4}-\d{2}-\d{2}$')
         hook = (ROOT / '.githooks/pre-commit').read_text()
