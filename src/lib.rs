@@ -6,6 +6,7 @@ mod identity;
 mod lifecycle;
 mod lineage;
 mod progress;
+mod progress_publish;
 mod progress_unit;
 mod progress_update;
 mod resource_envelope;
@@ -36,6 +37,10 @@ pub use lineage::{
     TaskLineageError,
 };
 pub use progress::TaskProgress;
+pub use progress_publish::{
+    ProgressPublishDecision,
+    ProgressPublishState,
+};
 pub use progress_unit::ProgressUnit;
 pub use progress_update::TaskProgressUpdate;
 pub use resource_envelope::{

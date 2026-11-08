@@ -40,7 +40,10 @@ the engine (registries, admission, execution, event streams) is yours.
 - **Lineage** — `TaskLineage` proves a parent-child edge is within one
   tree and never self-referential, enforced again on deserialization.
 - **Progress** — typed units, bounded aggregation, display fractions,
-  and lifecycle timestamps.
+  lifecycle timestamps, and pure per-task publication decisions. The publication
+  gate distinguishes first observations, step changes, counter resets and
+  completion from ordinary interval reporting; it reads no clock and performs
+  no event delivery.
 - **Resource envelopes** — an abstract `Tokens` unit with checked
   arithmetic; a `TokenBudget` that attenuates to children running in the
   same process and reserves shares for delegated ones (siblings split the
@@ -70,6 +73,31 @@ let edge = TaskLineage::try_new(child, root).expect("same tree, not self");
 assert!(TaskStatus::Running.validate_transition(TaskStatus::Sealing).is_ok());
 # let _ = edge;
 ```
+
+Progress publication is a separate decision from storing observed counters:
+
+```rust
+use tasktree::{ProgressPublishDecision, ProgressPublishState};
+
+let mut publications = ProgressPublishState::default();
+let decision = publications.decide(Some("copy"), 1, Some(10), 0);
+assert_eq!(decision, ProgressPublishDecision::First);
+publications.record_published(Some("copy"), 1, Some(10), 0);
+assert_eq!(
+    publications.decide(Some("copy"), 2, Some(10), 500),
+    ProgressPublishDecision::Suppressed,
+);
+assert_eq!(
+    publications.decide(Some("copy"), 2, Some(10), 1_000),
+    ProgressPublishDecision::PercentChanged,
+);
+```
+
+The caller supplies timestamps and records its selection explicitly. Ordinary
+updates have a one-second floor; first observations, label changes, resets and
+first completion remain distinguishable. A runtime can apply additional shared
+publication limits after this decision. This bookkeeping is not a durable task
+record, an event sink, or a scheduler.
 
 Serde uses the URN string form throughout, and every deserialization
 re-validates: a foreign prefix, a zero identity, or an illegal
