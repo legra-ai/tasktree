@@ -252,7 +252,7 @@ dependencies = [
 
 [[package]]
 name = "tasktree"
-version = "1.2.5"
+version = "1.2.6"
 dependencies = [
  "rand",
  "rhusky",
