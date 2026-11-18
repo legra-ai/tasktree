@@ -44,6 +44,16 @@ the engine (registries, admission, execution, event streams) is yours.
   gate distinguishes first observations, step changes, counter resets and
   completion from ordinary interval reporting; it reads no clock and performs
   no event delivery.
+- **Ordered activity** — `OrderedActivity` attributes an application payload
+  to one task at a checked `ActivitySeq` stream position; the payload declares
+  its `ActivityDurability` (`Retained` evidence is never dropped or merged,
+  `Coalescible` diagnostics may be replaced by a newer record).
+- **Bounded recovery** — a `RecoveryCheckpoint` retains every nonterminal task
+  plus at most a `TerminalTailLimit` of terminal ones, and names the cursor
+  from which incremental records replay. Construction and streaming
+  deserialization share one validator that refuses the first duplicate,
+  mis-keyed, lifecycle-invalid (`TaskStatus::validate_snapshot`) or
+  over-limit task before reading further. No storage, no I/O.
 - **Resource envelopes** — an abstract `Tokens` unit with checked
   arithmetic; a `TokenBudget` that attenuates to children running in the
   same process and reserves shares for delegated ones (siblings split the
